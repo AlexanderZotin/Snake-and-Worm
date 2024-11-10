@@ -106,7 +106,7 @@ public class Apple implements Paintable {
 
     public static Apple[] createApples(int eachColorCount) {
         if(eachColorCount <= 0) {
-            throw new IllegalArgumentException("Некорректное значение параметра eachColorCount:  " + eachColorCount);
+            throw new IllegalArgumentException("Invalid value of eachColorCount parameter:  " + eachColorCount);
         }
         Apple[] apples = new Apple[eachColorCount * 3];
         for(int i = 0; i < apples.length; i++) {

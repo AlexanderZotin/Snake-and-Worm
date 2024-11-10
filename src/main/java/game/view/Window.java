@@ -133,7 +133,7 @@ public class Window extends JFrame implements View {
             case 3 -> "Яблоки: одно каждого цвета";
             case 6 -> "Яблоки: по два каждого цвета";
             case 9 -> "Яблоки: по три каждого цвета";
-            default -> throw new UnsupportedOperationException("Неожиданное количество яблок: " + applesCount);
+            default -> throw new UnsupportedOperationException("Unexpected allpes count: " + applesCount);
         };
         changeApplesCount.setSelectedItem(selected);
     }
@@ -144,7 +144,7 @@ public class Window extends JFrame implements View {
             case MIN -> "Поле: 22×22 квадрата";
             case MIDDLE -> "Поле: 30×26 квадратов";
             case MAX -> "Поле: 43×26 квадратов";
-            default -> throw new UnsupportedOperationException("Неизвестная константа: " + size);
+            default -> throw new UnsupportedOperationException("Unknown constant: " + size);
         };
         changeFieldSize.setSelectedItem(selected);
     }

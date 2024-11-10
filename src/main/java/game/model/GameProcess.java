@@ -2,15 +2,11 @@ package game.model;
 
 import java.awt.Dimension;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
+import lombok.NonNull;
 
-@Getter
-@Setter
-@RequiredArgsConstructor
-@EqualsAndHashCode
+@Data
+@NonNull
 public class GameProcess {
     private final Game game;
     private volatile boolean started;

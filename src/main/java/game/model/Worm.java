@@ -53,7 +53,7 @@ public class Worm implements Movable, Paintable {
                 coordinatesOfEyes[0][0] += SIZE_OF_SQUARE;
                 coordinatesOfEyes[1][0] += SIZE_OF_SQUARE;
             }
-            default -> throw new UnsupportedOperationException("Движение " + motion + " неизвестно!");
+            default -> throw new UnsupportedOperationException("Motion " + motion + " is unknown!");
         }
     }
     
@@ -74,7 +74,7 @@ public class Worm implements Movable, Paintable {
                 coordinatesOfEyes[1][1] += SIZE_OF_SQUARE;
                 yCoordinates[0] += SIZE_OF_SQUARE;
             }
-            default -> throw new UnsupportedOperationException("Сторона " + climbing + " неизвестна!");
+            default -> throw new UnsupportedOperationException("Climbing " + climbing + " is unknown!");
         }
     }
 

@@ -7,11 +7,11 @@ import java.awt.Color;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Objects;
 import java.util.Optional;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -62,7 +62,7 @@ public class Snake implements Movable, Paintable {
                 coordinatesOfEyes[0][1] += SIZE_OF_SQUARE;
                 coordinatesOfEyes[1][1] += SIZE_OF_SQUARE;
             }
-            default -> throw new UnsupportedOperationException("Движение " + motion + " неизвестно!");
+            default -> throw new UnsupportedOperationException("Motion " + motion + " is unknown!");
         }
     }
 
@@ -96,8 +96,7 @@ public class Snake implements Movable, Paintable {
         return Optional.empty();
     }
 
-    private void eat(Apple apple) {
-        Objects.requireNonNull(apple, "Параметр apple не может быть null");
+    private void eat(@NonNull Apple apple) {
         int currentScore = xCoordinates.size() - 4;
         switch(apple.getType()) {
             case RED -> addOne();
@@ -118,7 +117,7 @@ public class Snake implements Movable, Paintable {
                 bonus.generateScoreToAppear(currentScore + POINTS_FOR_BONUS);
                 addBonusPoints();
             }
-            default -> throw new UnsupportedOperationException("Тип яблока " + apple.getType() + " неизвестен!");
+            default -> throw new UnsupportedOperationException("Apple type " + apple.getType() + " is unknown!");
         }
     }
     

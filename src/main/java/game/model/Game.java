@@ -5,15 +5,12 @@ import java.awt.Dimension;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import lombok.EqualsAndHashCode;
+import lombok.Data;
 import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.NonNull;
 
-@Getter
-@Setter
-@ToString
-@EqualsAndHashCode
+@Data
+@NonNull
 public class Game {
     private volatile Level level = Level.LEVEL_1;
     private volatile int score = 0;
@@ -38,7 +35,7 @@ public class Game {
             for(Level current : Level.values()) {
                 if(current.num == number) return current;
             }
-            throw new NoSuchElementException("Уровня с номером " + number + " не существует!");
+            throw new NoSuchElementException("Level  " + number + " doesn't consist!");
         }
     }
     

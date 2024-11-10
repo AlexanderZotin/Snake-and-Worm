@@ -25,6 +25,6 @@ public final class ProgramConstants {
             """;
     
     private ProgramConstants() {
-        throw new AssertionError("Не должно быть экземпляров класса ProgramConstants!");
+        throw new AssertionError("No instances of class ProgramConstans for you!");
     }
 }

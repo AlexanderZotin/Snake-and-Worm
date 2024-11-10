@@ -24,7 +24,8 @@ public class Application {
             View view = new Window(new PlayingField(size, drawNet));
             controller = new GameController(view);
             view.subscribeToListener(new Listener(controller));
-            view.setVisible(true);
+            view.update();
+            view.setVisible(true);;
         });
     }
 
