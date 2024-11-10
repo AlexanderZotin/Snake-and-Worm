@@ -1,10 +1,6 @@
 package game.model;
 
-import static game.ProgramConstants.SIZE_OF_SQUARE;
-import static game.ProgramConstants.ROUNDING_OF_SQUARE;
-import static game.ProgramConstants.WIDTH_OF_EYE;
-import static game.ProgramConstants.HEIGHT_OF_EYE;
-import static game.ProgramConstants.POINTS_FOR_BONUS;
+import static game.ProgramConstants.*;
 
 import java.awt.Graphics;
 import java.awt.Color;
@@ -14,12 +10,21 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
 
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
+@Getter
+@ToString
+@EqualsAndHashCode
 public class Snake implements Movable, Paintable {
-    private final List<Integer> xCoordinates = new ArrayList<>
+    private volatile List<Integer> xCoordinates = new ArrayList<>
             (Arrays.asList(SIZE_OF_SQUARE * 3, SIZE_OF_SQUARE * 2, SIZE_OF_SQUARE, 0));
-    private final List<Integer> yCoordinates  = new ArrayList<>(Arrays.asList(0, 0, 0, 0));
-    private final int[][] coordinatesOfEyes;
-    private Motion motion = Motion.RIGHT;
+    private volatile List<Integer> yCoordinates  = new ArrayList<>(Arrays.asList(0, 0, 0, 0));
+    private volatile int[][] coordinatesOfEyes;
+    
+    private @Setter Motion motion = Motion.RIGHT;
 
     public enum Motion {UP, DOWN, LEFT, RIGHT}
     
@@ -28,22 +33,6 @@ public class Snake implements Movable, Paintable {
         int x2 = SIZE_OF_SQUARE * 3 + (int) Math.round(SIZE_OF_SQUARE / 100.0 * 55.0);
         int y = (int) Math.round(SIZE_OF_SQUARE / 100.0 * 30.0);
         coordinatesOfEyes = new int[][]{{x1, y}, {x2, y}};
-    }
-
-    public List<Integer> getXCoordinates() {
-        return xCoordinates;
-    }
-  
-    public List<Integer> getYCoordinates() {
-        return yCoordinates;
-    }
-
-    public Motion getMotion() {
-        return motion;
-    }
-
-    public void setMotion(Motion motion) {
-        this.motion = Objects.requireNonNull(motion,  "Параметр motion не может быть null!");
     }
     
     @Override
@@ -79,7 +68,6 @@ public class Snake implements Movable, Paintable {
 
     @Override
     public  void paint(Graphics g) {
-        Objects.requireNonNull(g);
         g.setColor(Color.ORANGE);
         for(int i = 0; i < xCoordinates.size(); i++) {
             g.fillRoundRect(xCoordinates.get(i), yCoordinates.get(i),
@@ -90,16 +78,16 @@ public class Snake implements Movable, Paintable {
         g.fillOval(coordinatesOfEyes[1][0], coordinatesOfEyes[1][1], WIDTH_OF_EYE, HEIGHT_OF_EYE);
     }
 
-    public Optional<Apple> tryToEat(Apple[] allApples, Bonus bonus) {
-        Objects.requireNonNull(allApples, "Параметр allApples не может быть null!");
-        Objects.requireNonNull(bonus, "Параметр bonus не может быть null!");
-        for (Apple current : allApples) {
+    public Optional<Apple> tryToEat() {
+        ModelRepository models = ModelManager.getInstance().getModels();
+        for (Apple current : models.getApples()) {
             if(current.getXCoordinate() == xCoordinates.getFirst()
                     && current.getYCoordinate() == yCoordinates.getFirst()) {
                 eat(current);
                 return Optional.of(current);
             }
         }
+        Bonus bonus = models.getBonus();
         if (xCoordinates.getFirst() == bonus.getXCoordinate()
                 && yCoordinates.getFirst() == bonus.getYCoordinate()) {
             eat(bonus);
@@ -155,11 +143,5 @@ public class Snake implements Movable, Paintable {
         for(int i = 0; i < toRemove; i++) {
             removeOne();
         }
-    }
-
-    @Override
-    public String toString() {
-        return "Snake {x = " + xCoordinates + "; y = " + yCoordinates
-                + "; motion = " + motion.name() + "}";
     }
 }

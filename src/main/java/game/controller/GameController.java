@@ -1,64 +1,55 @@
 package game.controller;
 
-import game.Main;
+import game.Application;
 import game.model.*;
 import game.view.View;
 import game.view.PlayingField;
-import static game.ProgramConstants.HELP_TEXT;
 
-import java.awt.Dimension;
 import javax.swing.JOptionPane;
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import lombok.NonNull;
+
 public class GameController implements Controller {
-    private final View view;
-    private ModelRecovery models;
+    private View view;
     private Timer gameProcessTimer;
-
-    public GameController(View view, ModelRecovery models) {
-        this.view = Objects.requireNonNull(view, "Параметр view не может быть null!");
-        this.models = Objects.requireNonNull(models, "Параметр models не должен быть null!");
+    
+    public GameController(@NonNull View view) {
+        this.view = view;
     }
-
+    
     @Override
     public View getView() {
         return view;
     }
 
     @Override
-    public ModelRecovery getModels() {
-        return models;
-    }
-
-    @Override
-    public void levelChanged(Game.Level newLevel) {
-        models.getGameProcess().changeLevel(newLevel);
+    public void levelChanged(@NonNull Game.Level newLevel) {
+        getModels().getGameProcess().changeLevel(newLevel);
         scheduleGameProcess();
     }
 
+    private ModelRepository getModels() {
+        return ModelManager.getInstance().getModels();  
+    }
+    
     @Override
     public void applesCountChanged(int eachColorCount) {
-        Dimension fieldSize = getFieldSize();
-        models.setApples(Apple.createApples(eachColorCount, models, fieldSize));
+        ModelManager manager = ModelManager.getInstance();
+        ModelRepository models = manager.getModels();
+        models.setApples(Apple.createApples(eachColorCount));
         view.repaint();
     }
-
-    private Dimension getFieldSize() {
-        PlayingField.Size size = view.getPlayingField().sizeOfField();
-        return new Dimension(size.getX(), size.getY());
-    }
-
+    
     @Override
-    public void fieldSizeChanged(PlayingField.Size newSize) {
-        GameProcess gameProcess = models.getGameProcess();
-        gameProcess.setPauseStatus(true);
-        view.update(models);
+    public void fieldSizeChanged(@NonNull PlayingField.Size newSize) {
+        GameProcess gameProcess = ModelManager.getInstance().getModels().getGameProcess();
+        gameProcess.setPaused(true);
+        view.update();
         if(!gameProcess.isStarted() || askToRestart()) {
-            Main.restart(view, newSize, models);
+            Application.restart(newSize);
         }
     }
 
@@ -71,46 +62,59 @@ public class GameController implements Controller {
 
     @Override
     public void helpRequested() {
-        models.getGameProcess().setPauseStatus(true);
-        view.update(models);
-        JOptionPane.showMessageDialog(null, HELP_TEXT, "Как играть", JOptionPane.INFORMATION_MESSAGE);
+        ModelRepository models = getModels();
+        models.getGameProcess().setPaused(true);
+        view.update();
+        view.showHelp();
     }
 
     @Override
     public void goPressed() {
-        GameProcess gameProcess = models.getGameProcess();
+        GameProcess gameProcess = ModelManager.getInstance().getModels().getGameProcess();
         if(!gameProcess.isStarted()) {
-            gameProcess.setStartStatus(true);
+            gameProcess.setStarted(true);
             scheduleGameProcess();
         } else {
-            gameProcess.setPauseStatus(!gameProcess.isPaused());
+            gameProcess.setPaused(!gameProcess.isPaused());
         }
-        view.update(models);
+        view.update();
     }
 
     private void scheduleGameProcess() {
-        GameProcess process = models.getGameProcess();
+        GameProcess process = getModels().getGameProcess();
         if(!process.isStarted()) return;
         if(gameProcessTimer != null) gameProcessTimer.cancel();
         gameProcessTimer = new Timer();
-        Dimension fieldSize = getFieldSize();
         gameProcessTimer.schedule(new TimerTask() {
             @Override
             public void run() {
-                if(process.isPaused()) return;
-                Optional<ModelRecovery> updatedModels = process.process(fieldSize, models);
-                updatedModels.ifPresentOrElse(updated -> {
-                            models = updated;
-                            view.repaint();
-                            view.update(models);
-                        }, () -> gameProcessTimer.cancel());
+                if(!process.isPaused()) {
+                    boolean processSuccessful = process.process();
+                    if(processSuccessful) {
+                        view.repaint();
+                        view.update();
+                    } else {
+                        ifLoose();
+                    }
+                }
             }
         }, 0, process.getTimeToProcess());
     }
 
+    private void ifLoose() {
+        Game game = ModelManager.getInstance().getModels().getGameProcess().getGame();
+        int answer = JOptionPane.showConfirmDialog(null,
+                "Игра окончена! \nВаш счёт в этой игре: " + game.getScore() + "." +" \nНачать ещё раз?",
+                "", JOptionPane.YES_NO_OPTION);
+        if(answer == JOptionPane.YES_NO_OPTION) {
+            Application.restart(null);
+        } 
+        else System.exit(0);
+    }
+    
     @Override
     public void upArrowPressed() {
-        Snake snake = models.getSnake();
+        Snake snake = getSnake();
         if(isGameOn() && isXHeadCoordinateCorrect(snake.getXCoordinates())
                 && snake.getMotion() != Snake.Motion.DOWN) {
             snake.setMotion(Snake.Motion.UP);
@@ -122,22 +126,26 @@ public class GameController implements Controller {
     }
 
     private boolean isGameOn() {
-        GameProcess gameProcess = models.getGameProcess();
+        GameProcess gameProcess = getModels().getGameProcess();
         return gameProcess.isStarted() && !gameProcess.isPaused();
     }
 
     @Override
     public void downArrowPressed() {
-        Snake snake = models.getSnake();
+        Snake snake = getSnake();
         if(isGameOn() && isXHeadCoordinateCorrect(snake.getXCoordinates())
                 && snake.getMotion() != Snake.Motion.UP) {
             snake.setMotion(Snake.Motion.DOWN);
         }
     }
 
+    private Snake getSnake() {
+        return getModels().getSnake();
+    }
+    
     @Override
     public void rightArrowPressed() {
-        Snake snake = models.getSnake();
+        Snake snake = getSnake();
         if (isGameOn() && isYHeadCoordinateCorrect(snake.getYCoordinates())
                 && snake.getMotion() != Snake.Motion.LEFT) {
             snake.setMotion(Snake.Motion.RIGHT);
@@ -150,10 +158,18 @@ public class GameController implements Controller {
 
     @Override
     public void leftArrowPressed() {
-        Snake snake = models.getSnake();
+        Snake snake = getSnake();
         if (isGameOn() && isYHeadCoordinateCorrect(snake.getYCoordinates())
                 && snake.getMotion() != Snake.Motion.RIGHT) {
             snake.setMotion(Snake.Motion.LEFT);
         }
+    }
+    
+    @Override
+    public void dispose() {
+        if(gameProcessTimer != null) gameProcessTimer.cancel();
+        gameProcessTimer = null;
+        view.dispose();
+        view = null;
     }
 }

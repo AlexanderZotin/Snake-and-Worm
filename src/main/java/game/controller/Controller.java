@@ -1,12 +1,10 @@
 package game.controller;
 
 import game.model.Game;
-import game.model.ModelRecovery;
 import game.view.PlayingField;
 import game.view.View;
 
 public interface Controller {
-    ModelRecovery getModels();
     View getView();
 
     void levelChanged(Game.Level newLevel);
@@ -19,4 +17,6 @@ public interface Controller {
     void leftArrowPressed();
     void upArrowPressed();
     void downArrowPressed();
+    
+    void dispose();
 }

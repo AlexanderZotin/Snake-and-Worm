@@ -7,11 +7,16 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Color;
 import java.util.List;
-import java.util.Objects;
 
+import lombok.Data;
+import lombok.Getter;
+import lombok.NonNull;
+
+@Data
+@NonNull
 public class Apple implements Paintable {
-    private int xCoordinate;
-    private int yCoordinate;
+    private volatile int xCoordinate;
+    private volatile int yCoordinate;
     private final Type type;
     
     public enum Type {
@@ -20,40 +25,12 @@ public class Apple implements Paintable {
         PEOPLE(new Color(100, 0, 200)),
         SUPER_BONUS(new Color(255, 230, 15));
         
-        private final Color color;
+        private final @Getter Color color;
         
         Type(Color color) {
             this.color = color;
         }
-        
-        public Color getColor() {
-            return color;
-        }
     } 
-    
-    public Apple(Type type) {
-        this.type = Objects.requireNonNull(type, "Параметр type не может быть null!");
-    }
-    
-    public int getXCoordinate() {
-        return xCoordinate;
-    }
-    
-    public void setXCoordinate(int xCoordinate) {
-        this.xCoordinate = xCoordinate;
-    }
-    
-    public int getYCoordinate() {
-        return yCoordinate;
-    }
-    
-    public void setYCoordinate(int yCoordinate) {
-        this.yCoordinate = yCoordinate;
-    }
-    
-    public Type getType() {
-        return type;
-    }
 
     @Override
     public void paint(Graphics g) {
@@ -62,7 +39,8 @@ public class Apple implements Paintable {
                 SIZE_OF_SQUARE, SIZE_OF_SQUARE, ROUNDING_OF_SQUARE, ROUNDING_OF_SQUARE);
     }
 
-    public void regenerateCoordinates(Dimension fieldSize, ModelRecovery modelRecovery) {
+    public void regenerateCoordinates() {
+        Dimension fieldSize = ModelManager.getInstance().getModels().getFieldSize();
         do {
             xCoordinate = 1 + (int) 
                     (Math.random() * ((fieldSize.width - SIZE_OF_SQUARE * 2.0) / SIZE_OF_SQUARE));
@@ -72,14 +50,15 @@ public class Apple implements Paintable {
                     (Math.random() * ((double) (fieldSize.height - SIZE_OF_SQUARE) / SIZE_OF_SQUARE));
             yCoordinate *= SIZE_OF_SQUARE;
             if(yCoordinate == 0) yCoordinate += SIZE_OF_SQUARE;
-        } while(!areCoordinatesCorrect(modelRecovery));
+        } while(!areCoordinatesCorrect());
     }
   
-    private boolean areCoordinatesCorrect(ModelRecovery modelRecovery) {
-        return doNotMatchesWithMovables(modelRecovery.getSnake())
-                && doNotMatchesWithWorm(modelRecovery.getWorm())
-                && doNotMatchesWithOther(modelRecovery.getApples())
-                && doNotMatchesWithBonus(modelRecovery.getBonus());
+    private boolean areCoordinatesCorrect() {
+        ModelRepository models = ModelManager.getInstance().getModels();
+        return doNotMatchesWithMovables(models.getSnake())
+                && doNotMatchesWithWorm(models.getWorm())
+                && doNotMatchesWithOther(models.getApples())
+                && doNotMatchesWithBonus(models.getBonus());
     }
 
     private boolean doNotMatchesWithMovables(Snake snake) {
@@ -125,7 +104,7 @@ public class Apple implements Paintable {
         return true;
     }
 
-    public static Apple[] createApples(int eachColorCount, ModelRecovery currentModels, Dimension fieldSize) {
+    public static Apple[] createApples(int eachColorCount) {
         if(eachColorCount <= 0) {
             throw new IllegalArgumentException("Некорректное значение параметра eachColorCount:  " + eachColorCount);
         }
@@ -136,29 +115,8 @@ public class Apple implements Paintable {
             else if(i < eachColorCount * 2) currentType = Type.BLUE;
             else currentType = Type.PEOPLE;
             apples[i] = new Apple(currentType);
-            apples[i].regenerateCoordinates(fieldSize, currentModels);
+            apples[i].regenerateCoordinates();
         }
         return apples;
-    }
-
-    @Override
-    public String toString() {
-        return ("Apple: " + type.name() + " [" + xCoordinate + ", " + yCoordinate + "]");
-    }
-    
-    @Override 
-    public boolean equals(Object otherObject) {
-        if(this == otherObject) return true;
-        if(otherObject == null) return false;
-        if(this.getClass() != otherObject.getClass()) return false;
-        Apple otherApple = (Apple) otherObject;
-        if(otherApple.getType() != this.getType()) return false;
-        return (this.xCoordinate == otherApple.getXCoordinate()
-                && this.yCoordinate == otherApple.getYCoordinate());
-    }
-    
-    @Override 
-    public int hashCode() {
-        return xCoordinate * yCoordinate + type.name().length();
     }
 }

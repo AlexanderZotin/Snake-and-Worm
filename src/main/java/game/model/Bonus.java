@@ -4,15 +4,20 @@ import static game.ProgramConstants.ROUNDING_OF_SQUARE;
 import static game.ProgramConstants.SIZE_OF_SQUARE;
 import static game.ProgramConstants.SECONDS_FOR_BONUS;
 
-import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Color;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
+
+@ToString
+@EqualsAndHashCode(callSuper = true)
 public class Bonus extends Apple {
-    private int atWhatScoreAppear;
-    private boolean appeared;
+    private volatile int atWhatScoreAppear;
+    private volatile @Getter boolean appeared;
     
     public Bonus() {
         super(Apple.Type.SUPER_BONUS);
@@ -46,17 +51,15 @@ public class Bonus extends Apple {
         return score == atWhatScoreAppear;
     }
 
-    public boolean isAppeared() {
-        return appeared;
-    }
-
-    public void appear(Dimension fieldSize, ModelRecovery models) {
+    public void appear() {
         appeared = true;
-        regenerateCoordinates(fieldSize, models);
-        scheduleDisappear(models.getGameProcess());
+        regenerateCoordinates();
+        scheduleDisappear();
     }
 
-    private void scheduleDisappear(GameProcess gameProcess) {
+    private void scheduleDisappear() {
+        GameProcess gameProcess = ModelManager.getInstance()
+                .getModels().getGameProcess();
         Timer timer = new Timer();
         timer.schedule(new TimerTask() {
             int seconds = SECONDS_FOR_BONUS;

@@ -4,11 +4,19 @@ import static game.ProgramConstants.SIZE_OF_SQUARE;
 import java.awt.Dimension;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Objects;
 
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
+@Getter
+@Setter
+@ToString
+@EqualsAndHashCode
 public class Game {
-    private Level level = Level.LEVEL_1;
-    private int score = 0;
+    private volatile Level level = Level.LEVEL_1;
+    private volatile int score = 0;
    
     public enum Level {
         LEVEL_1(1, 250),
@@ -18,20 +26,12 @@ public class Game {
         LEVEL_5(5, 75),
         LEVEL_6(6, 50);
 
-        private final int num;
-        private final int timeForTimer;
+        private final @Getter int num;
+        private final @Getter int timeForTimer;
         
         Level(int num, int timeForTimer) {
             this.num = num;
             this.timeForTimer = timeForTimer;
-        }
-        
-        public int getNum() {
-            return num;
-        }
-
-        public int getTimeForTimer() {
-            return timeForTimer;
         }
 
         public static Level getLevelByNumber(int number) {
@@ -45,27 +45,13 @@ public class Game {
     public Game(Level level) {
         setLevel(level);
     }
-  
-    public void setLevel(Level level) {
-        this.level = Objects.requireNonNull(level, "Параметр level не может быть null");
-    }
 
-    public Level getLevel() {
-        return level;
-    }
-
-    public void setScore(int score) {
-        if(score < 0) throw new IllegalArgumentException("Параметр score не должен быть меньше нуля!");
-        this.score = score;
-    }
-
-    public int getScore() {
-        return score;
-    }
-
-    public boolean isOver(Dimension fieldSize, ModelRecovery modelRecovery) {
-        Snake snake = modelRecovery.getSnake();
-        return hitToWall(snake, fieldSize) || hitToHimself(snake) || hitToWorm(snake, modelRecovery.getWorm());
+    public boolean isOver() {
+        ModelRepository models = ModelManager.getInstance().getModels();
+        Snake snake = models.getSnake();
+        return hitToWall(snake, models.getFieldSize()) 
+                || hitToHimself(snake) 
+                || hitToWorm(snake, models.getWorm());
     }
 
     private boolean hitToWall(Snake snake, Dimension fieldSize) {
@@ -102,10 +88,5 @@ public class Game {
             }
         }
         return false;
-    }
-
-    @Override
-    public String toString() {
-        return "Game: [level = " + level + "; score = " + score + "]";
     }
 }
