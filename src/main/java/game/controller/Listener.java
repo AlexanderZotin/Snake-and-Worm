@@ -80,10 +80,10 @@ public class Listener extends KeyAdapter implements ActionListener, KeyListener 
     @Override
     public void keyPressed(KeyEvent e) {
         switch(e.getKeyCode()) {
-            case KeyEvent.VK_UP -> linkedController.upArrowPressed();
-            case KeyEvent.VK_DOWN -> linkedController.downArrowPressed();
-            case KeyEvent.VK_RIGHT -> linkedController.rightArrowPressed();
-            case KeyEvent.VK_LEFT -> linkedController.leftArrowPressed();
+            case KeyEvent.VK_UP, KeyEvent.VK_W -> linkedController.upArrowPressed();
+            case KeyEvent.VK_DOWN, KeyEvent.VK_S -> linkedController.downArrowPressed();
+            case KeyEvent.VK_RIGHT, KeyEvent.VK_D -> linkedController.rightArrowPressed();
+            case KeyEvent.VK_LEFT, KeyEvent.VK_A -> linkedController.leftArrowPressed();
             case KeyEvent.VK_CONTROL, KeyEvent.VK_SHIFT -> linkedController.goPressed();
         }
     }

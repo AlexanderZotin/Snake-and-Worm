@@ -9,7 +9,8 @@ public final class ProgramConstants {
     public static final byte POINTS_FOR_BONUS = 20;
     public static byte SECONDS_FOR_BONUS = 6;
     public static final String HELP_TEXT = """
-            Управляйте жёлтой змейкой стрелками на клавиатуре.
+            Управляйте жёлтой змейкой стрелками на клавиатуре
+            или клавишами a, s, d, w.
             Кормите змейку красными яблоками,
             но остерегайтесь синих и фиолетовых, ведь они наоборот отнимают очки!
             Будьте внимательны: иногда на поле появляется бонус, который даёт
